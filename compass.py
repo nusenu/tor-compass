@@ -380,6 +380,7 @@ class RelayStats(object):
         group_weights = dict.fromkeys(RelayStats.WEIGHTS, 0)
         relays_in_group, exits_in_group, guards_in_group = 0, 0, 0
         ases_in_group = set()
+        countries_in_group = set()
         result = util.Result()
         for relay in group:
             for weight in RelayStats.WEIGHTS:
@@ -400,6 +401,7 @@ class RelayStats(object):
             else:
                 result.guard = '-'
             result.cc = relay.get('country', '??').upper()
+            countries_in_group.add(result.cc)
             result.as_no = relay.get('as_number', '??')
             result.as_name = relay.get('as_name', '??')
             result.as_info = "%s %s" %(result.as_no, result.as_name)
@@ -414,9 +416,9 @@ class RelayStats(object):
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
             if not options.by_as and not options.ases:
-                result.as_info = "(%s)" % len(ases_in_group)
+                result.as_info = "(%d)" % len(ases_in_group)
             if not options.by_country and not options.country:
-                options.country = "*"
+                result.cc = "(%d)" % len(countries_in_group)
 
         #Include our weight values
         for weight in group_weights.iterkeys():
