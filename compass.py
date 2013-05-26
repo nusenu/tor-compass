@@ -237,14 +237,15 @@ class RelayStats(object):
         return filters
 
     def _get_group_function(self, options):
-        if options.by_country and options.by_as:
-            return lambda relay: (relay.get('country', None), relay.get('as_number', None))
-        elif options.by_country:
-            return lambda relay: relay.get('country', None)
-        elif options.by_as:
-            return lambda relay: relay.get('as_number', None)
-        else:
-            return lambda relay: relay.get('fingerprint')
+        funcs = []
+        if options.by_country:
+            funcs.append(lambda relay: relay.get('country', None))
+        if options.by_as:
+            funcs.append(lambda relay: relay.get('as_number', None))
+        # Default on grouping by fingerprint
+        if len(funcs) == 0:
+            funcs.append(lambda relay: relay.get('fingerprint'))
+        return lambda relay: tuple([func(relay) for func in funcs])
 
     def add_relay(self, relay):
         key = self._get_group(relay)
