@@ -183,6 +183,15 @@ class InverseFilter(BaseFilter):
                 inverse_relays.append(relay)
         return inverse_relays
 
+def get_network_family(relay):
+    addresses = relay.get('or_addresses', [])
+    if len(addresses) == 0:
+        return None
+    # Guaranteed by Onionoo. Currently restricted to IPv4 by the network design.
+    primary_ip, _ = addresses[0].split(':')
+    # Network family is /16, so let's take the first two bytes by regex
+    return "%s.0.0/16" % re.match(r'^([0-9]+\.[0-9]+)\.', primary_ip).group(1)
+
 class RelayStats(object):
     def __init__(self, options, custom_datafile="details.json"):
         self._data = None
@@ -242,6 +251,8 @@ class RelayStats(object):
             funcs.append(lambda relay: relay.get('country', None))
         if options.by_as:
             funcs.append(lambda relay: relay.get('as_number', None))
+        if options.by_network_family:
+            funcs.append(get_network_family)
         # Default on grouping by fingerprint
         if len(funcs) == 0:
             funcs.append(lambda relay: relay.get('fingerprint'))
@@ -325,13 +336,15 @@ class RelayStats(object):
           filtered = "countries"
       elif options.by_as:
           filtered = "ASes"
+      elif options.by_network_family:
+          filtered = "network families"
       else:
           filtered = "relays"
 
       # Add selected relays to the result set
       for i,relay in enumerate(relay_set):
         # We have no links if we're grouping
-        if options.by_country or options.by_as:
+        if options.by_country or options.by_as or options.by_network_family:
           relay.link = False
 
         if i < options.top:
@@ -382,6 +395,7 @@ class RelayStats(object):
         relays_in_group, exits_in_group, guards_in_group = 0, 0, 0
         ases_in_group = set()
         countries_in_group = set()
+        network_families_in_group = set()
         result = util.Result()
         for relay in group:
             for weight in RelayStats.WEIGHTS:
@@ -404,6 +418,7 @@ class RelayStats(object):
             result.cc = relay.get('country', '??').upper()
             countries_in_group.add(result.cc)
             result.primary_ip = relay.get('or_addresses', ['??:0'])[0].split(':')[0]
+            network_families_in_group.add(get_network_family(relay))
             result.as_no = relay.get('as_number', '??')
             result.as_name = relay.get('as_name', '??')
             result.as_info = "%s %s" %(result.as_no, result.as_name)
@@ -412,9 +427,8 @@ class RelayStats(object):
 
         # If we want to group by things, we need to handle some fields
         # specially
-        if options.by_country or options.by_as:
+        if options.by_country or options.by_as or options.by_network_family:
             result.nick = "*"
-            result.primary_ip = "*"
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
@@ -422,6 +436,10 @@ class RelayStats(object):
                 result.as_info = "(%d)" % len(ases_in_group)
             if not options.by_country and not options.country:
                 result.cc = "(%d)" % len(countries_in_group)
+            if not options.by_network_family:
+                result.primary_ip = "(%d diff. /16)" % len(network_families_in_group)
+            else:
+                result.primary_ip = network_families_in_group.pop()
 
         #Include our weight values
         for weight in group_weights.iterkeys():
@@ -480,6 +498,8 @@ def create_option_parser():
                      help="group relays by AS")
     group.add_option("-C", "--by-country", action="store_true", default=False,
                      help="group relays by country")
+    group.add_option("-N", "--by-network-family", action="store_true", default=False,
+                     help="group relays by network family (/16 IPv4)")
     parser.add_option_group(group)
     group = OptionGroup(parser, "Sorting options")
     group.add_option("--sort", type="choice",
