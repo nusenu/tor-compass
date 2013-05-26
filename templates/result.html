@@ -13,6 +13,7 @@
         <th>Exit</th>
         <th>Guard</th>
         <th>Country</th>
+        <th>IPv4</th>
         <th>Autonomous System</th>
       </tr>
     </thead>
@@ -35,6 +36,7 @@
         <td>{{ result.exit }}</td>
         <td>{{ result.guard }}</td>
         <td>{{ result.cc }}</td>
+        <td>{{ result.primary_ip }}</td>
         <td>{{ result.as_info }}</td>
       </tr>
       {% endfor %}

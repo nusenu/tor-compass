@@ -259,10 +259,10 @@ class RelayStats(object):
       Print the selection returned by sort_and_reduce relays into a 
       string for the command line version.
       """
-      column_widths = [9,10,10,10,10,21,80 if options.links else 42,7,7,4,11]
+      column_widths = [9,10,10,10,10,21,80 if options.links else 42,7,7,4,16,11]
       headings = ["CW","adv_bw","P_guard","P_middle", "P_exit", "Nickname",
                   "Link" if options.links else "Fingerprint",
-                  "Exit","Guard","CC", "Autonomous System"]
+                  "Exit","Guard","CC", "IPv4", "Autonomous System"]
 
       #Print the header
       header = "".join(word.ljust(column_widths[i]) for i,word in enumerate(headings))
@@ -402,6 +402,7 @@ class RelayStats(object):
                 result.guard = '-'
             result.cc = relay.get('country', '??').upper()
             countries_in_group.add(result.cc)
+            result.primary_ip = relay.get('or_addresses', ['??:0'])[0].split(':')[0]
             result.as_no = relay.get('as_number', '??')
             result.as_name = relay.get('as_name', '??')
             result.as_info = "%s %s" %(result.as_no, result.as_name)
@@ -412,6 +413,7 @@ class RelayStats(object):
         # specially
         if options.by_country or options.by_as:
             result.nick = "*"
+            result.primary_ip = "*"
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group

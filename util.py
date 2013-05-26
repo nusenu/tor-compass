@@ -57,6 +57,7 @@ class Result():
         self.exit = ""
         self.guard = ""
         self.cc = ""
+        self.primary_ip = ""
         self.as_no = ""
         self.as_name = ""
         self.as_info = ""
@@ -75,11 +76,11 @@ class Result():
       Return this Result object as a list with the fields in the order
       expected for printing.
       """
-      format_str = "%.4f%%|%.4f%%|%.4f%%|%.4f%%|%.4f%%|%s|%s|%s|%s|%s|%s"
+      format_str = "%.4f%%|%.4f%%|%.4f%%|%.4f%%|%.4f%%|%s|%s|%s|%s|%s|%s|%s"
       formatted = format_str % ( self.cw, self.adv_bw, self.p_guard, self.p_middle, self.p_exit,
                     self.nick, 
                     "https://atlas.torproject.org/#details/" + self.fp if links else self.fp,
-                    self.exit, self.guard, self.cc, self.as_info )
+                    self.exit, self.guard, self.cc, self.primary_ip, self.as_info )
       return formatted.split("|")
 
 class ResultEncoder(json.JSONEncoder):
