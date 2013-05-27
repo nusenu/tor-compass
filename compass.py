@@ -330,14 +330,8 @@ class RelayStats(object):
       # Set up to handle the special lines at the bottom
       excluded_relays = util.Result(zero_probs=True)
       total_relays = util.Result(zero_probs=True)
-      if options.by_country and options.by_as:
-          filtered = "countries and ASes"
-      elif options.by_country:
-          filtered = "countries"
-      elif options.by_as:
-          filtered = "ASes"
-      elif options.by_network_family:
-          filtered = "network families"
+      if options.by_country or options.by_as or options.by_network_family:
+          filtered = "relay groups"
       else:
           filtered = "relays"
 

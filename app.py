@@ -11,6 +11,7 @@ class Opt(object):
     option_details = {
       'by_as':(Boolean, False),
       'by_country':(Boolean, False),
+      'by_network_family':(Boolean, False),
       'inactive':( Boolean, False ),
       'exits_only':( Boolean, False ),
       'guards_only': ( Boolean, False),
