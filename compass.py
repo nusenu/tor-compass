@@ -253,6 +253,8 @@ class RelayStats(object):
             funcs.append(lambda relay: relay.get('as_number', None))
         if options.by_network_family:
             funcs.append(get_network_family)
+        if options.by_contact:
+            funcs.append(lambda relay: relay.get('contact', None))
         # Default on grouping by fingerprint
         if len(funcs) == 0:
             funcs.append(lambda relay: relay.get('fingerprint'))
@@ -330,7 +332,7 @@ class RelayStats(object):
       # Set up to handle the special lines at the bottom
       excluded_relays = util.Result(zero_probs=True)
       total_relays = util.Result(zero_probs=True)
-      if options.by_country or options.by_as or options.by_network_family:
+      if options.by_country or options.by_as or options.by_network_family or options.by_contact:
           filtered = "relay groups"
       else:
           filtered = "relays"
@@ -338,7 +340,7 @@ class RelayStats(object):
       # Add selected relays to the result set
       for i,relay in enumerate(relay_set):
         # We have no links if we're grouping
-        if options.by_country or options.by_as or options.by_network_family:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact:
           relay.link = False
 
         if i < options.top:
@@ -421,8 +423,11 @@ class RelayStats(object):
 
         # If we want to group by things, we need to handle some fields
         # specially
-        if options.by_country or options.by_as or options.by_network_family:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact:
             result.nick = "*"
+	    #lets use the nick column if we group by contact
+            if options.by_contact:
+                result.nick = relay.get('contact', None)
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
@@ -494,6 +499,8 @@ def create_option_parser():
                      help="group relays by country")
     group.add_option("-N", "--by-network-family", action="store_true", default=False,
                      help="group relays by network family (/16 IPv4)")
+    group.add_option("-T", "--by-contact", action="store_true", default=False,
+                     help="group relays by ContactInfo")
     parser.add_option_group(group)
     group = OptionGroup(parser, "Sorting options")
     group.add_option("--sort", type="choice",
