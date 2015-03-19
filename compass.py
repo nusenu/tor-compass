@@ -209,6 +209,12 @@ def get_os(relay):
         return "*BSD"
     return " ".join(platform.split()[3:])
 
+def get_version(relay):
+    platform = relay.get('platform', None)
+    if len(platform) == 0:
+        return None
+    return platform.split()[1]
+
 class RelayStats(object):
     def __init__(self, options, custom_datafile="details.json"):
         self._data = None
@@ -272,6 +278,8 @@ class RelayStats(object):
             funcs.append(get_network_family)
         if options.by_os:
             funcs.append(get_os)
+        if options.by_version:
+            funcs.append(get_version)
         if options.by_contact:
             funcs.append(lambda relay: relay.get('contact', None))
         # Default on grouping by fingerprint
@@ -351,7 +359,7 @@ class RelayStats(object):
       # Set up to handle the special lines at the bottom
       excluded_relays = util.Result(zero_probs=True)
       total_relays = util.Result(zero_probs=True)
-      if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os:
+      if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
           filtered = "relay groups"
       else:
           filtered = "relays"
@@ -359,7 +367,7 @@ class RelayStats(object):
       # Add selected relays to the result set
       for i,relay in enumerate(relay_set):
         # We have no links if we're grouping
-        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
           relay.link = False
 
         if i < options.top:
@@ -442,13 +450,17 @@ class RelayStats(object):
 
         # If we want to group by things, we need to handle some fields
         # specially
-        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
             result.nick = "*"
-	    #lets use the nick column if we group by contact
+	    #lets use the nick column
             if options.by_contact:
                 result.nick = relay.get('contact', None)
             if options.by_os:
                 result.nick = get_os(relay)
+            if options.by_version:
+                result.nick = get_version(relay)
+            if options.by_os and options.by_version:
+                result.nick = get_version(relay) + " on " + get_os(relay)
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
@@ -522,6 +534,8 @@ def create_option_parser():
                      help="group relays by network family (/16 IPv4)")
     group.add_option("-O", "--by-os", action="store_true", default=False,
                      help="group relays by operating system")
+    group.add_option("-V", "--by-version", action="store_true", default=False,
+                     help="group relays by tor version")
     group.add_option("-T", "--by-contact", action="store_true", default=False,
                      help="group relays by ContactInfo")
     parser.add_option_group(group)
