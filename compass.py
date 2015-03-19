@@ -461,6 +461,8 @@ class RelayStats(object):
                 result.nick = get_version(relay)
             if options.by_os and options.by_version:
                 result.nick = get_version(relay) + " on " + get_os(relay)
+            if options.by_network_family:
+                result.nick = get_network_family(relay)
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
