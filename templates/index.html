@@ -149,9 +149,16 @@
               </div>
               <label class="control-label" for="as">AS</label>
               <div class="controls">
+                <label class="checkbox">
                 <input type="checkbox" id="by_as" value="True" name="by_as" ng-model="query.by_as">
                 group relays by AS </label>
-            </div>
+              </div>
+              <label class="control-label" for="network">Network (/16)</label>
+               <div class="controls">
+                 <label class="checkbox">
+                 <input type="checkbox" id="by_network_family" value="True" name="by_network_family" ng-model="query.by_network_family">
+                group relays by /16 network</label>
+             </div>
           </div>
 
           <div class="control-group">
