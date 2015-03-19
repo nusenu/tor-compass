@@ -466,9 +466,9 @@ class RelayStats(object):
             result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
-            if not options.by_as and not options.ases:
+            if not options.by_as and not options.ases and not len(ases_in_group) == 1:
                 result.as_info = "(%d)" % len(ases_in_group)
-            if not options.by_country and not options.country:
+            if not options.by_country and not options.country and not len(countries_in_group) == 1:
                 result.cc = "(%d)" % len(countries_in_group)
             if not options.by_network_family:
                 result.primary_ip = "(%d diff. /16)" % len(network_families_in_group)
