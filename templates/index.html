@@ -159,6 +159,24 @@
                  <input type="checkbox" id="by_network_family" value="True" name="by_network_family" ng-model="query.by_network_family">
                 group relays by /16 network</label>
              </div>
+              <label class="control-label" for="os">OS</label>
+               <div class="controls">
+                 <label class="checkbox">
+                 <input type="checkbox" id="by_os" value="True" name="by_os" ng-model="query.by_os">
+                group relays by OS</label>
+             </div>
+              <label class="control-label" for="version">Tor Version</label>
+               <div class="controls">
+                 <label class="checkbox">
+                 <input type="checkbox" id="by_version" value="True" name="by_version" ng-model="query.by_version">
+                group relays by tor version</label>
+             </div>
+              <label class="control-label" for="contact">Contact</label>
+               <div class="controls">
+                 <label class="checkbox">
+                 <input type="checkbox" id="by_contact" value="True" name="by_contact" ng-model="query.by_contact">
+                group relays by ContactInfo</label>
+             </div>
           </div>
 
           <div class="control-group">
