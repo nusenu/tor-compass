@@ -81,6 +81,14 @@ class ASFilter(BaseFilter):
     def accept(self, relay):
         return relay.get('as_number', None) in self._as_sets
 
+class NickFilter(BaseFilter):
+    def __init__(self, nickregex):
+        self._nickregex = nickregex
+
+    def accept(self, relay):
+        if re.match(self._nickregex, relay['nickname']):
+            return True
+
 class ExitFilter(BaseFilter):
     def accept(self, relay):
         return relay.get('exit_probability', -1) > 0.0
@@ -247,6 +255,8 @@ class RelayStats(object):
             filters.append(RunningFilter())
         if options.family:
             filters.append(FamilyFilter(options.family, self.data['relays']))
+        if options.nickregex:
+            filters.append(NickFilter(options.nickregex))
         if options.country:
             filters.append(CountryFilter(options.country))
         if options.ases:
@@ -497,6 +507,8 @@ def create_option_parser():
     group.add_option("-a", "--as", dest="ases", action="append",
                      help="select only relays from autonomous system number AS",
                      metavar="AS")
+    group.add_option("-n", "--nickregex", action="store", type="string", metavar="REGEX",
+                     help="select only relays matching the given regex")
     group.add_option("-c", "--country", action="append",
                      help="select only relays from country with code CC", metavar="CC")
     group.add_option("-e", "--exits-only", action="store_true",

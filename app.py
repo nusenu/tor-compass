@@ -23,6 +23,7 @@ class Opt(object):
       'sort_reverse':( Boolean, True ),
       'top':( Int , 10),
       'family':( NullFn, "" ),
+      'nickregex':( NullFn, ""),
       'ases':( List, [] ),
       'country':( JSON, [] ),
       'exit_filter':( NullFn, "all_relays" )

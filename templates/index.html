@@ -94,6 +94,12 @@
                   <input type="checkbox" id="exits_only" value="True" name="exits_only" ng-model='query.exits_only'>
                   select only relays suitable for exit position</label>
               </div>
+              <label class="control-label" for="nickregex">Nickname (regex)</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="nickregex" name="nickregex" ng-model="query.nickregex"
+                placeholder=".*string">
+                <span class="help-inline">filter relays by nickname regex</span>
+              </div>
               <label class="control-label" for="family">Family</label>
               <div class="controls">
                 <input type="text" class="input-xlarge" id="family" name="family" ng-model="query.family"
