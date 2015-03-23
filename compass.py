@@ -475,7 +475,8 @@ class RelayStats(object):
             result.nick = "*"
 	    #lets use the nick column
             if options.by_contact or options.by_family:
-                result.nick = relay.get('contact', None)
+                nick = str(relay.get('contact', None))[:39]
+                result.nick = nick.replace('|','')
             if options.by_os:
                 result.nick = get_os(relay)
             if options.by_version:
@@ -520,7 +521,7 @@ def create_option_parser():
                      help="select only relays from autonomous system number AS",
                      metavar="AS")
     group.add_option("-n", "--nickregex", action="store", type="string", metavar="REGEX",
-                     help="select only relays matching the given regex")
+                     help="select only relays whos nicknames matche the given regex")
     group.add_option("-c", "--country", action="append",
                      help="select only relays from country with code CC", metavar="CC")
     group.add_option("-e", "--exits-only", action="store_true",
