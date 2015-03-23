@@ -200,6 +200,15 @@ def get_network_family(relay):
     # Network family is /16, so let's take the first two bytes by regex
     return "%s.0.0/16" % re.match(r'^([0-9]+\.[0-9]+)\.', primary_ip).group(1)
 
+def get_family(relay):
+    if relay.get('family') == None:
+        return relay['fingerprint']
+    family = list(relay.get('family'))
+    fingerprint = str(relay['fingerprint'])
+    if fingerprint not in family:
+        family.append('$'+fingerprint)
+    return "".join(sorted(family))
+
 def get_os(relay):
     platform = relay.get('platform', None)
     if len(platform) == 0:
@@ -284,6 +293,8 @@ class RelayStats(object):
             funcs.append(lambda relay: relay.get('country', None))
         if options.by_as:
             funcs.append(lambda relay: relay.get('as_number', None))
+        if options.by_family:
+            funcs.append(get_family)
         if options.by_network_family:
             funcs.append(get_network_family)
         if options.by_os:
@@ -303,14 +314,14 @@ class RelayStats(object):
             self._relays[key] = []
         self._relays[key].append(relay)
 
-    WEIGHTS = ['consensus_weight_fraction', 'advertised_bandwidth_fraction', 'guard_probability', 'middle_probability', 'exit_probability']
+    WEIGHTS = ['consensus_weight_fraction', 'advertised_bandwidth', 'guard_probability', 'middle_probability', 'exit_probability']
 
     def print_selection(self,selection,options):
       """
       Print the selection returned by sort_and_reduce relays into a 
       string for the command line version.
       """
-      column_widths = [9,10,10,10,10,21,80 if options.links else 42,7,7,4,16,11]
+      column_widths = [9,10,10,10,10,42,80 if options.links else 42,7,7,4,16,11]
       headings = ["CW","adv_bw","P_guard","P_middle", "P_exit", "Nickname",
                   "Link" if options.links else "Fingerprint",
                   "Exit","Guard","CC", "IPv4", "Autonomous System"]
@@ -369,7 +380,7 @@ class RelayStats(object):
       # Set up to handle the special lines at the bottom
       excluded_relays = util.Result(zero_probs=True)
       total_relays = util.Result(zero_probs=True)
-      if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
+      if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version or options.by_family:
           filtered = "relay groups"
       else:
           filtered = "relays"
@@ -377,7 +388,7 @@ class RelayStats(object):
       # Add selected relays to the result set
       for i,relay in enumerate(relay_set):
         # We have no links if we're grouping
-        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version or options.by_family:
           relay.link = False
 
         if i < options.top:
@@ -460,10 +471,10 @@ class RelayStats(object):
 
         # If we want to group by things, we need to handle some fields
         # specially
-        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version:
+        if options.by_country or options.by_as or options.by_network_family or options.by_contact or options.by_os or options.by_version or options.by_family:
             result.nick = "*"
 	    #lets use the nick column
-            if options.by_contact:
+            if options.by_contact or options.by_family:
                 result.nick = relay.get('contact', None)
             if options.by_os:
                 result.nick = get_os(relay)
@@ -473,7 +484,8 @@ class RelayStats(object):
                 result.nick = get_version(relay) + " on " + get_os(relay)
             if options.by_network_family:
                 result.nick = get_network_family(relay)
-            result.fp = "(%d relays)" % relays_in_group
+            if relays_in_group > 1:
+                result.fp = "(%d relays)" % relays_in_group
             result.exit = "(%d)" % exits_in_group
             result.guard = "(%d)" % guards_in_group
             if not options.by_as and not options.ases and not len(ases_in_group) == 1:
@@ -481,14 +493,14 @@ class RelayStats(object):
             if not options.by_country and not options.country and not len(countries_in_group) == 1:
                 result.cc = "(%d)" % len(countries_in_group)
             if not options.by_network_family:
-                result.primary_ip = "(%d diff. /16)" % len(network_families_in_group)
+                result.primary_ip = "(%d)" % len(network_families_in_group)
             else:
                 result.primary_ip = network_families_in_group.pop()
 
         #Include our weight values
         for weight in group_weights.iterkeys():
           result['cw'] = group_weights['consensus_weight_fraction'] * 100.0
-          result['adv_bw'] = group_weights['advertised_bandwidth_fraction'] * 100.0
+          result['adv_bw'] = group_weights['advertised_bandwidth'] * 8 / 1000000
           result['p_guard'] = group_weights['guard_probability'] * 100.0
           result['p_middle'] = group_weights['middle_probability'] * 100.0
           result['p_exit'] = group_weights['exit_probability'] * 100.0
@@ -542,6 +554,8 @@ def create_option_parser():
     group = OptionGroup(parser, "Grouping options")
     group.add_option("-A", "--by-as", action="store_true", default=False,
                      help="group relays by AS")
+    group.add_option("-F", "--by-family", action="store_true", default=False,
+                     help="group relays by family")
     group.add_option("-C", "--by-country", action="store_true", default=False,
                      help="group relays by country")
     group.add_option("-N", "--by-network-family", action="store_true", default=False,
