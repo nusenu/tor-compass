@@ -521,7 +521,7 @@ def create_option_parser():
                      help="select only relays from autonomous system number AS",
                      metavar="AS")
     group.add_option("-n", "--nickregex", action="store", type="string", metavar="REGEX",
-                     help="select only relays whos nicknames matche the given regex")
+                     help="select only relays whos nicknames match the given regex")
     group.add_option("-c", "--country", action="append",
                      help="select only relays from country with code CC", metavar="CC")
     group.add_option("-e", "--exits-only", action="store_true",
