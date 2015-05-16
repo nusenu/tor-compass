@@ -15,6 +15,7 @@ class Opt(object):
       'by_os':(Boolean,False),
       'by_version':(Boolean,False),
       'by_contact':(Boolean,False),
+      'by_family':(Boolean,False),
       'inactive':( Boolean, False ),
       'exits_only':( Boolean, False ),
       'guards_only': ( Boolean, False),

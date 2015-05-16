@@ -211,12 +211,12 @@ def get_family(relay):
 
 def get_os(relay):
     platform = relay.get('platform', None)
-    if len(platform) == 0:
+    if len(unicode(platform)) == 0:
         return None
     # we expect the OS string to start with the 4. word (space separated)
     # and go until the end of the platform string
     # example "Tor 0.2.6.3-alpha on Windows XP" -> Windows XP
-    rawos = " ".join(platform.split()[3:])
+    rawos = " ".join(unicode(platform).split()[3:])
     # lets merge Linux*, Windows*, *BSD (TODO: make this opt-out)
     if re.match("^Linux", rawos):
         return "Linux"
@@ -224,7 +224,7 @@ def get_os(relay):
         return "Windows"
     if re.match(".*BSD$", rawos) or re.match("^NetBSD", rawos) or rawos == 'Bitrig' or rawos == 'DragonFly':
         return "*BSD"
-    return " ".join(platform.split()[3:])
+    return " ".join(unicode(platform).split()[3:])
 
 def get_version(relay):
     platform = relay.get('platform', None)
